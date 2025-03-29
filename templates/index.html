@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <title>Norlights Montessori Ungdoms Bibliotek</title>
+  <!--Hvordan vi skaper layoutten til siden, disse har ikke mye og si for selve koden men uten det hadde det også ikke sett fint ut-->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .app-container {
+      width: 90vw;
+      margin: 40px auto;
+      background: linear-gradient(145deg, #f4d88a 0%, #ffb347 40%, #7ba9e6 100%);
+      border-radius: 40px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      animation: fadeIn 1s ease-in;
+      display: flex;
+      flex-direction: row;
+      padding-bottom: 30px;
+    }
+
+    .sidebar {
+      width: 30%;
+      background: white;
+      padding: 20px;
+      border-radius: 30px 0 0 30px;
+      box-shadow: 4px 0 10px rgba(0,0,0,0.05);
+    }
+
+    .main-content {
+      width: 70%;
+    }
+
+    .loaned-title {
+      font-weight: bold;
+      color: #004080;
+      margin-bottom: 10px;
+    }
+
+    .loaned-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .loaned-list li {
+      margin-bottom: 8px;
+    }
+
+    .return-search {
+      margin-top: 20px;
+    }
+
+    .return-search input {
+      padding: 10px;
+      border-radius: 8px;
+      width: 100%;
+      border: 1px solid #004080;
+    }
+
+    .return-results {
+      margin-top: 10px;
+    }
+
+    .return-results button {
+      margin-top: 5px;
+      padding: 5px 10px;
+      background: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .top-link {
+      text-align: center;
+      padding: 20px 10px;
+      background-color: #003366;
+    }
+
+    .top-link a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      background: #ff9900;
+      padding: 12px 24px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #004080;
+    }
+
+    .logo {
+      max-width: 180px;
+      display: block;
+      margin: 20px auto;
+      border-radius: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+      box-sizing: border-box;
+      border-radius: 6px;
+      border: 1px solid #004080;
+    }
+
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .form-section {
+      background: #fff7e6;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .tab-buttons {
+      display: flex;
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    .tab-buttons button {
+      flex: 1;
+      padding: 10px;
+      background-color: #004080;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .tab-buttons button.active {
+      background-color: #ff9900;
+    }
+
+    .book-tab {
+      display: none;
+    }
+
+    .book-tab.active {
+      display: block;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 10px;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+    }
+
+    th {
+      background: #004080;
+      color: white;
+    }
+
+    .available {
+      color: green;
+    }
+
+    .unavailable {
+      color: red;
+    }
+
+    .category-section {
+      background: white;
+      padding: 20px;
+      margin-top: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<!--Her så tilknytter vi forskjellige funksjoner til så sagt "pyntet" vi har ovenfor. (spesielt kan vi se på linken, vi eller til href = linken
+til skolen som knytter at teksten der får en link limet på seg som fører deg til hovedsiden til Norlights Montessori Skole)-->
+<body>
+  <div class="app-container">
+    <div class="sidebar">
+      <div class="loaned-title">📋 Aktive lån</div>
+      <ul class="loaned-list" id="loaned-users"></ul>
+
+      <div class="return-search">
+        <input type="text" id="returnSearch" placeholder="Søk på elevens navn...">
+        <div class="return-results" id="returnResults"></div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="top-link">             
+        <a href="https://montessoriskole-stavanger.no" target="_blank">🏫 Gå til Norlights Montessori Skole</a>
+      </div>
+
+      <!--Dette er koden mann ser gjennom heles siden, hvor <h> kodene er får "HEADERS" som vil si det de sier større tekst. Inputsa er igjen det
+        mann tror det er er bobler hvor man kan inputte sin egen informasjon ved "text" om dett heller skulle vært tall så måtte vi ha identifisert
+         dette. En siste ting mann kan ta ud fra denne koden er disse "id" ene som er tilknyttet våre forskjellige inputs, det dreier seg å gi 
+         disse funksjonenen en navn så vil kan finne de fram da vi trenger mer kompleks løsninger med python foreksempel, da lager vi en fil for python
+         og sier finn gjennom id "loanForm" som finner informasjonen vi fylte ut i (Lån bok) delen av koden.-->
+      <div class="container">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Norlights Montessori Logo" class="logo">
+        <h2>Norlights Montesori Ungdoms Bibliotek</h2>
+
+        <div class="form-section">
+          <h3>➕ Legg til bok</h3>
+          <form id="addBookForm">
+            <input type="text" id="title" placeholder="Tittel" required>
+            <input type="text" id="author" placeholder="Forfatter" required>
+            <input type="text" id="isbn" placeholder="ISBN" required>
+            <button type="submit">Legg til bok</button>
+          </form>
+        </div>
+
+        <div class="form-section">
+          <h3>📖 Lån bok</h3>
+          <form id="loanForm">
+            <input type="text" id="loanName" placeholder="Elevens navn" required>
+            <input type="text" id="loanISBN" placeholder="Skann eller skriv ISBN" required>
+            <button type="submit">Lån bok</button>
+          </form>
+        </div>
+
+        <input type="text" id="search" placeholder="Søk på tittel, forfatter eller ISBN">
+
+        <div class="tab-buttons">
+          <button class="active" onclick="switchBookTab('available')">📚 Tilgjengelige</button>
+          <button onclick="switchBookTab('loaned')">❌ Utlånte</button>
+        </div>
+
+        <div id="book-tab-available" class="book-tab active">
+          <table>
+            <thead>
+              <tr><th>Tittel</th><th>Forfatter</th><th>ISBN</th><th>Lånt av</th><th>Handling</th></tr>
+            </thead>
+            <tbody id="available-book-list"></tbody>
+          </table>
+        </div>
+
+        <div id="book-tab-loaned" class="book-tab">
+          <table>
+            <thead>
+              <tr><th>Tittel</th><th>Forfatter</th><th>ISBN</th><th>Lånt av</th><th>Handling</th></tr>
+            </thead>
+            <tbody id="loaned-book-list"></tbody>
+          </table>
+        </div>
+
+        <div class="category-section">
+          <h3>📚 Kategorier (kommer snart)</h3>
+          <p>Her vil du kunne sortere bøker etter emner og fag.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--Her kjører vi en scirpt "funksjon" får å informere hva koden her skal gjøre med utfyllt informasjon, gjennom informasjonen vi gir lager
+  denne funksjonen en query hvor koden i app.py hjelper til og sortere og plassere denne i rikitg liste foreksempel.-->
+
+  <script>
+    function switchBookTab(tab) {
+      document.querySelectorAll('.tab-buttons button').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.book-tab').forEach(tab => tab.classList.remove('active'));
+      document.getElementById(`book-tab-${tab}`).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function fetchBooks() {
+      fetch('/books')
+        .then(res => res.json())
+        .then(books => {
+          const search = document.getElementById('search').value.toLowerCase();
+          let availableHtml = '';
+          let loanedHtml = '';
+          let loanedList = '';
+          let returnResults = '';
+          const returnSearch = document.getElementById('returnSearch').value.toLowerCase();
+
+          books.forEach(book => {
+            const match = book.title.toLowerCase().includes(search) || book.author.toLowerCase().includes(search) || book.isbn.toLowerCase().includes(search);
+            if (!match) return;
+
+            const row = `<tr>
+              <td>${book.title}</td>
+              <td>${book.author}</td>
+              <td>${book.isbn}</td>
+              <td>${book.borrowed_by || ''}</td>
+              <td>${book.available
+                ? `<button onclick="prefillLoan('${book.isbn}')">Lån</button>`
+                : `<button onclick="returnBook('${book.isbn}')">Returner</button>`}</td>
+            </tr>`;
+
+            if (book.available) availableHtml += row;
+            else {
+              loanedHtml += row;
+              if (book.borrowed_by) loanedList += `<li><strong>${book.borrowed_by}</strong>: ${book.title}</li>`;
+              if (book.borrowed_by && book.borrowed_by.toLowerCase().includes(returnSearch)) {
+                returnResults += `<div>${book.borrowed_by} – <em>${book.title}</em><br><button onclick="returnBook('${book.isbn}')">Returner</button></div>`;
+              }
+            }
+          });
+
+          document.getElementById('available-book-list').innerHTML = availableHtml;
+          document.getElementById('loaned-book-list').innerHTML = loanedHtml;
+          document.getElementById('loaned-users').innerHTML = loanedList;
+          document.getElementById('returnResults').innerHTML = returnResults;
+        });
+    }
+
+    document.getElementById('addBookForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const title = document.getElementById('title').value;
+      const author = document.getElementById('author').value;
+      const isbn = document.getElementById('isbn').value;
+
+      fetch('/add_book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, author, isbn })
+      })
+        .then(res => res.json())
+        .then(data => {
+          alert(data.message || data.error);
+          document.getElementById('addBookForm').reset();
+          fetchBooks();
+        });
+    });
+
+    document.getElementById('loanForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const name = document.getElementById('loanName').value;
+      const isbn = document.getElementById('loanISBN').value;
+
+      fetch('/loan_book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_name: name, book_isbn: isbn })
+      })
+        .then(res => res.json())
+        .then(data => {
+          alert(data.message || data.error);
+          document.getElementById('loanForm').reset();
+          fetchBooks();
+        });
+    });
+
+    function returnBook(isbn) {
+      fetch('/return_book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ book_isbn: isbn })
+      })
+        .then(res => res.json())
+        .then(data => {
+          alert(data.message || data.error);
+          fetchBooks();
+        });
+    }
+
+    function prefillLoan(isbn) {
+      document.getElementById('loanISBN').value = isbn;
+      document.getElementById('loanName').focus();
+    }
+
+    document.getElementById('search').addEventListener('input', fetchBooks);
+    document.getElementById('returnSearch').addEventListener('input', fetchBooks);
+
+    fetchBooks();
+  </script>
+</body>
+</html>
